@@ -204,6 +204,7 @@ transform_installation() {
     mv Hearthstone.app/Contents/Resources/Data Bin/Hearthstone_Data
     mv Hearthstone.app/Contents/Resources/'unity default resources' Bin/Hearthstone_Data/Resources
     mv Hearthstone.app/Contents/Resources/PlayerIcon.icns Bin/Hearthstone_Data/Resources
+    python3 -c "from PIL import Image; img = Image.open('Bin/Hearthstone_Data/Resources/PlayerIcon.icns'); img.save('Bin/Hearthstone_Data/Resources/PlayerIcon.png')"
 
     rm -rf Hearthstone.app
     rm -rf 'Hearthstone Beta Launcher.app'
@@ -273,7 +274,7 @@ Type=Application
 Name=Hearthstone
 Path=$TARGET_PATH
 Exec=Bin/Hearthstone.x86_64
-Icon=$TARGET_PATH/Bin/Hearthstone_Data/Resources/PlayerIcon.icns
+Icon=$TARGET_PATH/Bin/Hearthstone_Data/Resources/PlayerIcon.png
 Categories=Game;
 StartupWMClass=Hearthstone.x86_64
 EOF
