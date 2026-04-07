@@ -117,8 +117,10 @@ download_hearthstone() {
         CDN_DOMAIN="http://level3.blizzard.com/tpr/hs"
     fi
     info "Using CDN: $CDN_DOMAIN"
-    $NGDP_BIN --cdn "${CDN_DOMAIN}" fetch http://${REGION}.patch.battle.net:1119/hsb --tags OSX --tags ${LOCALE} --tags Production
-    $NGDP_BIN install http://${REGION}.patch.battle.net:1119/hsb $VERSION --tags OSX --tags ${LOCALE} --tags Production
+    # Fetch config/metadata from the global CDN (regional CDNs only host data files, not config)
+    $NGDP_BIN fetch http://${REGION}.patch.battle.net:1119/hsb --tags OSX --tags ${LOCALE} --tags Production
+    # Download game data from the faster regional CDN
+    $NGDP_BIN --cdn "${CDN_DOMAIN}" install http://${REGION}.patch.battle.net:1119/hsb $VERSION --tags OSX --tags ${LOCALE} --tags Production
     echo $VERSION >.version
 }
 
