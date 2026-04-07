@@ -2,5 +2,6 @@ hearthstone/
 login/login
 stubs/*.so
 token/Token.exe
+/token
 # CocoIndex Code (ccc)
 /.cocoindex_code/
