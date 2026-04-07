@@ -77,6 +77,9 @@ Stubs are placed at paths the Unity plugin loader expects:
 
 ## Known constraints
 
+- **keg submodule must be initialized** — run `git submodule update --init --recursive` after cloning; `craft.sh` fails with `realpath: keg/bin/ngdp: No such file or directory` if skipped
+- **Regional CDNs 404 on config files** — `eu/us/kr.cdn.blizzard.com` only host game data; config/metadata must use `level3.blizzard.com`. Pass `--cdn` to `ngdp install` (data), not `ngdp fetch` (config)
+- **keg downloads are sequential by default** — the patched submodule uses `ThreadPoolExecutor` (32 workers); if reverting keg, expect ~36h install time for ~21,951 loose files
 - The in-game shop is non-functional (the commerce SDK stub returns no-ops)
 - The `token` file is tied to the username that created it (key derivation XORs username into entropy)
 - The game must be launched from inside the `hearthstone/` directory (both `token` and `client.config` are read from the working directory)
