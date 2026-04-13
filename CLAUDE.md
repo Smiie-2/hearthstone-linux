@@ -51,6 +51,7 @@ The key derivation uses `login/login.c::getEncryptionKey` and `stubs/CoreFoundat
 ### `craft.sh` orchestration
 
 `craft.sh` is the entry point for both fresh installs and updates. It:
+- Tunes `Bin/Hearthstone_Data/boot.config` for Linux (enables multithreaded rendering and graphics jobs via `tune_boot_config()`)
 - Manages a Python venv (for the `keg` submodule) in `./venv/`
 - Persists region/locale choices in `.region` and `.locale` files inside the `hearthstone/` directory
 - Tracks installed versions in `.version` and `.unity` files
@@ -84,3 +85,6 @@ Stubs are placed at paths the Unity plugin loader expects:
 - The `token` file is tied to the username that created it (key derivation XORs username into entropy)
 - The game must be launched from inside the `hearthstone/` directory (both `token` and `client.config` are read from the working directory)
 - Wayland + NVIDIA may crash the login tool with `Error 71`; workaround: `WEBKIT_DISABLE_DMABUF_RENDERER=1 ./login` or `__NV_DISABLE_EXPLICIT_SYNC=1 ./login`
+- **`hearthstone/` is gitignored** — it contains the game installation, not source code. Any persistent changes to game files (e.g. `boot.config`) must be automated in `craft.sh` or they'll be lost on the next update
+- **`boot.config` ships from macOS with suboptimal Linux defaults** — `gfx-disable-mt-rendering=1` disables multithreaded rendering; `craft.sh`'s `tune_boot_config()` patches this automatically
+- **Git remotes:** `origin` = user's fork (`Smiie-2/hearthstone-linux`), `upstream` = original repo (`0xf4b1/hearthstone-linux`). Always push to `origin`, never directly to `upstream`
