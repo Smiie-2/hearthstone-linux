@@ -260,11 +260,22 @@ check_directory() {
     TARGET_PATH=$PWD
 }
 
+tune_boot_config() {
+    BOOT_CONFIG=$TARGET_PATH/Bin/Hearthstone_Data/boot.config
+    if [ -f "$BOOT_CONFIG" ]; then
+        info "Tuning boot.config for Linux performance ..."
+        sed -i 's/gfx-disable-mt-rendering=1/gfx-disable-mt-rendering=0/' "$BOOT_CONFIG"
+        grep -q 'gfx-enable-gfx-jobs' "$BOOT_CONFIG" || sed -i '/gfx-disable-mt-rendering/a\gfx-enable-gfx-jobs=1' "$BOOT_CONFIG"
+    fi
+}
+
 check_directory $1
 transform_installation
 check_unity $2
 popd
 create_compatibility_files
+tune_boot_config
+
 
 mkdir -p ~/.local/share/applications
 
