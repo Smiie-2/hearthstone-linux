@@ -31,6 +31,7 @@ create_venv() {
     pushd keg
     pip install .
     popd
+    pip install Pillow
 }
 
 check_keg()
@@ -44,6 +45,8 @@ ensure_keg() {
     fi
     source venv/bin/activate
     check_keg || (create_venv && check_keg) || (error "keg is not working" && exit 1)
+    # Pillow is required by transform_installation to convert PlayerIcon.icns → PNG.
+    python -c "import PIL" 2>/dev/null || pip install Pillow
 }
 
 set_region() {
@@ -117,8 +120,9 @@ download_hearthstone() {
         CDN_DOMAIN="http://level3.blizzard.com/tpr/hs"
     fi
     info "Using CDN: $CDN_DOMAIN"
-    $NGDP_BIN --cdn "${CDN_DOMAIN}" fetch http://${REGION}.patch.battle.net:1119/hsb --tags OSX --tags ${LOCALE} --tags Production
-    $NGDP_BIN install http://${REGION}.patch.battle.net:1119/hsb $VERSION --tags OSX --tags ${LOCALE} --tags Production
+    # Regional CDNs 404 on config/metadata files — fetch from the default global CDN.
+    $NGDP_BIN fetch http://${REGION}.patch.battle.net:1119/hsb --tags OSX --tags ${LOCALE} --tags Production
+    $NGDP_BIN --cdn "${CDN_DOMAIN}" install http://${REGION}.patch.battle.net:1119/hsb $VERSION --tags OSX --tags ${LOCALE} --tags Production
     echo $VERSION >.version
 }
 
