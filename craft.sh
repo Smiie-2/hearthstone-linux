@@ -45,8 +45,14 @@ ensure_keg() {
     fi
     source venv/bin/activate
     check_keg || (create_venv && check_keg) || (error "keg is not working" && exit 1)
-    # Pillow is required by transform_installation to convert PlayerIcon.icns → PNG.
-    python -c "import PIL" 2>/dev/null || pip install Pillow
+}
+
+# Covers both the managed install (runs against the keg venv) and the local
+# install path where $1 is supplied and ensure_keg is skipped entirely.
+ensure_pillow() {
+    python3 -c "from PIL import Image" 2>/dev/null && return
+    info "Installing Pillow for PNG icon conversion ..."
+    pip install Pillow
 }
 
 set_region() {
@@ -208,6 +214,7 @@ transform_installation() {
     mv Hearthstone.app/Contents/Resources/Data Bin/Hearthstone_Data
     mv Hearthstone.app/Contents/Resources/'unity default resources' Bin/Hearthstone_Data/Resources
     mv Hearthstone.app/Contents/Resources/PlayerIcon.icns Bin/Hearthstone_Data/Resources
+    ensure_pillow
     python3 -c "from PIL import Image; img = Image.open('Bin/Hearthstone_Data/Resources/PlayerIcon.icns'); img.save('Bin/Hearthstone_Data/Resources/PlayerIcon.png')"
 
     rm -rf Hearthstone.app
