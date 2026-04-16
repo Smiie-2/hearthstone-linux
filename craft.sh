@@ -31,6 +31,7 @@ create_venv() {
     pushd keg
     pip install .
     popd
+    pip install Pillow
 }
 
 check_keg()
@@ -44,6 +45,14 @@ ensure_keg() {
     fi
     source venv/bin/activate
     check_keg || (create_venv && check_keg) || (error "keg is not working" && exit 1)
+}
+
+# Covers both the managed install (runs against the keg venv) and the local
+# install path where $1 is supplied and ensure_keg is skipped entirely.
+ensure_pillow() {
+    python3 -c "from PIL import Image" 2>/dev/null && return
+    info "Installing Pillow for PNG icon conversion ..."
+    pip install Pillow
 }
 
 set_region() {
@@ -117,8 +126,9 @@ download_hearthstone() {
         CDN_DOMAIN="http://level3.blizzard.com/tpr/hs"
     fi
     info "Using CDN: $CDN_DOMAIN"
-    $NGDP_BIN --cdn "${CDN_DOMAIN}" fetch http://${REGION}.patch.battle.net:1119/hsb --tags OSX --tags ${LOCALE} --tags Production
-    $NGDP_BIN install http://${REGION}.patch.battle.net:1119/hsb $VERSION --tags OSX --tags ${LOCALE} --tags Production
+    # Regional CDNs 404 on config/metadata files — fetch from the default global CDN.
+    $NGDP_BIN fetch http://${REGION}.patch.battle.net:1119/hsb --tags OSX --tags ${LOCALE} --tags Production
+    $NGDP_BIN --cdn "${CDN_DOMAIN}" install http://${REGION}.patch.battle.net:1119/hsb $VERSION --tags OSX --tags ${LOCALE} --tags Production
     echo $VERSION >.version
 }
 
@@ -204,6 +214,7 @@ transform_installation() {
     mv Hearthstone.app/Contents/Resources/Data Bin/Hearthstone_Data
     mv Hearthstone.app/Contents/Resources/'unity default resources' Bin/Hearthstone_Data/Resources
     mv Hearthstone.app/Contents/Resources/PlayerIcon.icns Bin/Hearthstone_Data/Resources
+    ensure_pillow
     python3 -c "from PIL import Image; img = Image.open('Bin/Hearthstone_Data/Resources/PlayerIcon.icns'); img.save('Bin/Hearthstone_Data/Resources/PlayerIcon.png')"
 
     rm -rf Hearthstone.app
